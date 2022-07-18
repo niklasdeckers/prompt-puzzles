@@ -55,7 +55,7 @@ def main():
     pwo.put_markdown("""
     # dalle-guesser 🧐
     
-    Guess the object that the gamemaster is thinking about.
+    I'm thinking of something specific. Can you guess what?
     """)
     pwo.put_scrollable(pwo.put_scope('scrollable'), height=400, keep_bottom=True)
     pwo.put_scope('counter')
