@@ -8,14 +8,12 @@ from util import get_dalle_images, get_gpt3_response
 
 
 def check_form(data):  # todo also impose length constraints, and singleline constraints
-    err_msg = "Please fill all fields."
-    if not data['A']:
-        return ('A', err_msg)
-    if not data['B']:
-        return ('B', err_msg)
+    err_msg = "Please make a guess."
+    if not data["guess"]:
+        return ("guess", err_msg)
 
 
-def verify_guess(groundtruth, A, B):
+def verify_guess(groundtruth, A, B):  # todo remove
     gpt3_prompt = f"""What is closer to "{groundtruth}"?
 1: "{A}"
 2: "{B}"
@@ -31,7 +29,7 @@ Answer:"""
 
 
 def evolve_image(groundtruth, history):
-    best = history[-1][2]
+    best = history[-1]["guess"]
     if best:
         image_prompt = f"{best} (pencil drawing)"
     else:
@@ -41,7 +39,7 @@ def evolve_image(groundtruth, history):
 
 def check_win(groundtruth, history):
     gpt3_prompt = f"""Are these things the same?
-1: {history[-1][2]}
+1: {history[-1]["guess"]}
 2: {groundtruth}
 Answer (yes/no):"""
     response = get_gpt3_response(gpt3_prompt)
@@ -75,25 +73,20 @@ def main():
 
             with pwo.use_scope('input'):
                 data = pwi.input_group("Your next guess", [
-                    pwi.input('Does the image show', name='A', value=None if history else "something you can touch"),
-                    pwi.input('or', name='B', value=None if history else "something you cannot touch"),
-                    pwi.input("?", readonly=True, name="C")
+                    pwi.input('You are thinking about...', name='guess', value=None if history else "something large"),
                 ], validate=check_form)
 
-            A = data['A']
-            B = data['B']
+            guess = data['guess']
 
-            query = f"{A}\nor\n{B}?"
+            query = f"{guess}?"
 
-            best = verify_guess(groundtruth, A, B)
-
-            history.append((A, B, best))
+            history.append({"guess": guess})
 
             image_prompt = evolve_image(groundtruth, history)
 
             counter += 1
             with pwo.use_scope('counter', clear=True):
-                pwo.put_text(f"Round counter: {counter}")
+                pwo.put_text(f"Guess counter: {counter}")
 
             with pwo.use_scope('scrollable'):
                 with pwo.put_loading():
@@ -104,7 +97,7 @@ def main():
 
             if check_win(groundtruth, history):
                 with pwo.use_scope('counter', clear=True):
-                    pwo.put_text(f"You did it! You won within {counter} guesses!\n{groundtruth}")
+                    pwo.put_text(f"You did it! You won within {counter} guesses!\nI was thinking about {groundtruth}:")
                     with pwo.put_loading():
                         pwo.put_image(get_dalle_images(groundtruth)[0])
                 break
