@@ -109,7 +109,7 @@ def main():
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument("--port", dest="port",
-                        help="Port under which the app will be running", default=8080)
+                        help="Port under which the app will be running", default=8081)
     args = parser.parse_args()
 
     pw.start_server(main, port=args.port, debug=True)
