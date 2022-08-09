@@ -1,7 +1,7 @@
 FROM python:3
 
 # expose
-EXPOSE 8080
+EXPOSE 8081
 
 # set working directory
 WORKDIR /app
@@ -22,4 +22,4 @@ RUN pip3 install -r requirements.txt
 COPY . /app
 
 # run server
-CMD python3 app.py --port 8080
+CMD python3 app.py --port 8081
