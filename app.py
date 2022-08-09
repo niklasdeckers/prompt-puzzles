@@ -1,4 +1,5 @@
 import re
+from argparse import ArgumentParser
 
 import pywebio as pw
 import pywebio.input as pwi
@@ -106,4 +107,9 @@ def main():
 
 
 if __name__ == '__main__':
-    pw.start_server(main, port=8080, debug=True)
+    parser = ArgumentParser()
+    parser.add_argument("--port", dest="port",
+                        help="Port under which the app will be running", default=8080)
+    args = parser.parse_args()
+
+    pw.start_server(main, port=args.port, debug=True)
