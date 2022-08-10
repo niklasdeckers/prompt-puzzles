@@ -19,8 +19,8 @@ def get_dalle_images(prompt, num_images=1):
         backend_url = url + "/dalle"
         r = requests.post(backend_url, json={"text": prompt, "num_images": num_images})
         if r.status_code == 200:
-            json = r.json()
-            images = json["generatedImgs"]
+            r_json = r.json()
+            images = r_json["generatedImgs"]
             images = [base64.b64decode(img) for img in images]
             return images
     if r:
