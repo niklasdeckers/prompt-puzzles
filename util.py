@@ -17,16 +17,19 @@ def get_dalle_images(prompt, num_images=1):
     r = None
     for url in urls:
         backend_url = url + "/dalle"
-        r = requests.post(backend_url, json={"text": prompt, "num_images": num_images})
-        if r.status_code == 200:
-            r_json = r.json()
-            images = r_json["generatedImgs"]
-            images = [base64.b64decode(img) for img in images]
-            return images
+        try:
+            r = requests.post(backend_url, json={"text": prompt, "num_images": num_images})
+            if r.status_code == 200:
+                r_json = r.json()
+                images = r_json["generatedImgs"]
+                images = [base64.b64decode(img) for img in images]
+                return images
+        except requests.ConnectionError:
+            continue
     if r:
         raise urllib.error.URLError(f"Error {r.status_code} while fetching DALLE results")
     else:
-        raise ValueError("No backend URL specified")
+        raise ValueError("No valid backend URL specified")
 
 
 def get_gpt3_response(prompt):
