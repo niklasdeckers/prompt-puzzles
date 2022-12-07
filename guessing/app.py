@@ -5,7 +5,7 @@ import pywebio as pw
 import pywebio.input as pwi
 import pywebio.output as pwo
 
-from util import get_dalle_images, get_gpt3_response
+from util import get_generated_images, get_gpt3_response
 
 
 def check_form(data):  # todo also impose length constraints, and singleline constraints
@@ -93,14 +93,14 @@ def main():
                 with pwo.put_loading():
                     pwo.put_row([
                         pwo.put_text(query),
-                        pwo.put_image(get_dalle_images(image_prompt)[0])
+                        pwo.put_image(get_generated_images(image_prompt)[0])
                     ])
 
             if check_win(groundtruth, history):
                 with pwo.use_scope('counter', clear=True):
                     pwo.put_text(f"You did it! You won within {counter} guesses!\nI was thinking about {groundtruth}:")
                     with pwo.put_loading():
-                        pwo.put_image(get_dalle_images(groundtruth)[0])
+                        pwo.put_image(get_generated_images(groundtruth)[0])
                 break
 
         pwi.actions('', ['Start new game'])

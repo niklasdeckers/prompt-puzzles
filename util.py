@@ -3,22 +3,27 @@ import json
 import os
 import urllib.error
 
+import numpy as np
 import openai
 import requests
 
 
-def get_dalle_images(prompt, num_images=1):
+def get_generated_images(prompt, num_images=1, seed=-1):
+    if seed == -1:
+        seed = np.random.randint(100000000)
+
     urls = []
-    if os.environ.get('DALLE_BACKEND_URLS'):
-        urls += json.loads(os.environ.get('DALLE_BACKEND_URLS'))
-    if os.environ.get('DALLE_BACKEND_URL'):
-        urls.append(os.environ.get('DALLE_BACKEND_URL'))
+    if os.environ.get('TXT2IMG_BACKEND_URLS'):
+        urls += json.loads(os.environ.get('TXT2IMG_BACKEND_URLS'))
+    if os.environ.get('TXT2IMG_BACKEND_URL'):
+        urls.append(os.environ.get('TXT2IMG_BACKEND_URL'))
 
     r = None
     for url in urls:
-        backend_url = url + "/dalle"
+        backend_url = url + "/backend"
         try:
-            r = requests.post(backend_url, json={"text": prompt, "num_images": num_images})
+            r = requests.post(backend_url, json={"text": prompt, "num_images": num_images,
+                                                 "seed": seed})
             if r.status_code == 200:
                 r_json = r.json()
                 images = r_json["generatedImgs"]
@@ -27,7 +32,7 @@ def get_dalle_images(prompt, num_images=1):
         except requests.ConnectionError:
             continue
     if r:
-        raise urllib.error.URLError(f"Error {r.status_code} while fetching DALLE results")
+        raise urllib.error.URLError(f"Error {r.status_code} while fetching network results")
     else:
         raise ValueError("No valid backend URL specified")
 

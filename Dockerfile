@@ -22,4 +22,4 @@ RUN pip3 install -r requirements.txt
 COPY . /app
 
 # run server
-CMD python3 app.py --port 8081
+CMD python3 index.py --port 8081
