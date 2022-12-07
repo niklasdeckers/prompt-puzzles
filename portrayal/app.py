@@ -151,10 +151,12 @@ def main():
 
         pin.pin_wait_change("done")
 
+        choices = pin.pin['choices'].copy()
+
         with pwo.popup("Thanks!", closable=False) as s:
             pwo.put_column([
                 pwo.put_text(f"You managed to recreate the given image by "
-                             f"{len(pin.pin['choices'])} of {len(verification_groundtruth)} criteria."),
+                             f"{len(choices)} of {len(verification_groundtruth)} criteria."),
                 pin.put_actions(name="continue", buttons=["Start next round"])
             ], size="auto")
 
