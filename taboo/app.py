@@ -59,7 +59,7 @@ def main():
     pwo.put_markdown("""
     # Taboo 🤫
 
-    - You are given an image that shows an certain object.
+    - You are given an image that shows a certain object.
     - Try to identify the object and describe it with a short term.
     - The software will then generate an image for your description. The more it matches the original image, the better!
     - However, your description may not contain the taboo words listed below.
