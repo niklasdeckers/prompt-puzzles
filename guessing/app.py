@@ -9,8 +9,7 @@ import pywebio.pin as pin
 from util import get_generated_images, get_gpt3_response
 
 task_data = [  # todo use real examples from skribble?
-    "tree",
-    "happy poodle",
+    "birch tree",
     "gummy bear",
     "iphone",
     "hot dog",
@@ -42,46 +41,42 @@ def check_form(data):
         return ("guess", "Only short one, two or three word guesses are allowed.")
 
 
-def get_hierarchy(groundtruth):  # todo maybe use 3 steps instead of 5? makes it easier for the user.
-    prompt = f'''This is a 5 step construction of the term "happy poodle":
-1. living being
-2. happy living being
-3. happy animal
-4. happy dog
-5. happy poodle
+def get_hierarchy(groundtruth):
+    prompt = f'''This is a 3 step construction of the term "poodle":
+1. animal
+2. dog
+3. poodle
 """
-This is a 5 step construction of the term "{groundtruth}":'''
+This is a 3 step construction of the term "{groundtruth}":'''
     response = get_gpt3_response(prompt)
+    print(prompt, response)
     return [term.lower().strip() for term in re.findall(r"\d\. ([a-zA-Z\- ]+)", response)]
     # todo assert that it ends on groundtruth (best: remove in GPT logic and add later)
 
 
 def get_position_in_hierarchy(guess, hierarchy):
-    insertion = "\n".join([f"{i}. {term}" for i, term in enumerate(list(reversed(hierarchy)) + ["anything"])])
+    insertion = "\n".join([f"{i + 1}. {term}" for i, term in enumerate(list(reversed(hierarchy)) + ["anything"])])
     prompt = f'''Given the following list of terms:
-1. happy poodle
-2. poodle
-3. dog
-4. animal
-5. living being
-6. anything
-What is the first term that is not more specific than "cat"? Because every cat is an animal (4), but not every cat is a dog (3), and the former is directly behind the latter (4 minus 3 is one), this is
+1. poodle
+2. dog
+3. animal
+4. anything
+What is the first term that is not more specific than "cat" (subject word)? Because every cat (subject word) is an animal (3), but not every cat (subject word) is a dog (2), and the former is directly behind the latter (3 minus 2 is one), this is
 [animal]
 """
 Given the following list of terms:
 1. red dog
-2. colored dog
-3. colored animal
-4. colored living being
-5. living being
-6. anything
-What is the first term that is not more specific than "colored animal"? Because it itself is in the list, this is
-[colored animal]
+2. dog
+3. animal
+4. anything
+What is the first term that is not more specific than "doggo" (subject word)? Because doggo (subject word) matches up with the word dog from the list, this is
+[dog]
 """
 Given the following list of terms:
 {insertion}
-What is the first term that is not more specific than "{guess}"? Because'''
+What is the first term that is not more specific than "{guess}" (subject word)? Because'''
     response = get_gpt3_response(prompt)
+    print(prompt, response)
     term = re.search(r"\[([a-zA-Z\- ]+)\]", response).group(1).lower().strip()
     try:
         ind = hierarchy.index(term)
@@ -100,11 +95,11 @@ def put_dialog_message_user(content):
 
 def main():
     pwo.put_markdown("""
-    # Guessing 🧐
+    # Guessing Golf 🧐
     
     I'm thinking of something specific. Can you guess what?
     """)
-    pwo.put_scrollable(pwo.put_scope('scrollable'), height=600, keep_bottom=True)
+    pwo.put_scrollable(pwo.put_scope('scrollable'), height=800, keep_bottom=True)
 
     for groundtruth in task_data:  # loop of multiple games
 
@@ -118,7 +113,7 @@ def main():
 
             with pwo.use_scope('scrollable'):
                 with pwo.put_loading():
-                    imgs = get_generated_images(wrap_prompt(current_prompt), seed=42, num_images=4)
+                    imgs = get_generated_images(wrap_prompt(current_prompt), num_images=4)
                     put_dialog_message_bot(pwo.put_grid([[pwo.put_image(imgs[0]), None,
                                                           pwo.put_image(imgs[1])], [None, None, None],
                                                          [pwo.put_image(imgs[2]), None,
@@ -127,7 +122,7 @@ def main():
 
                 # todo put encouraging random message?
 
-            with pwo.use_scope('input'):  # todo include counter
+            with pwo.use_scope('input'):
                 data = pwi.input_group("Your next guess", [
                     pwi.input('', name='guess', value=""),
                     pwi.actions(name='submit', buttons=['Submit'])
@@ -135,34 +130,33 @@ def main():
 
             guess = data['guess']
 
-            # todo write down guess in chatlog with put_dialog_message_user
-
             counter += 1
+
+            with pwo.use_scope('scrollable'):
+                put_dialog_message_user(pwo.put_html(
+                    f'<div style="text-align: right"> Guess {counter}: <br> {guess} </div>'))  # todo escape
 
             pos = get_position_in_hierarchy(guess, hierarchy)
 
             if pos == len(hierarchy) - 1:
-                with pwo.use_scope('counter', clear=True):
-                    pwo.put_text(
-                        f"You did it! You won within {counter} guesses!\nI was thinking about {groundtruth}:")  # todo do as chatbox message; also the button in the chat
+                with pwo.use_scope('scrollable'):
                     with pwo.put_loading():
-                        pwo.put_image(get_generated_images(groundtruth)[0])
-                break
+                        img = get_generated_images(groundtruth)[0]
+                        put_dialog_message_bot(pwo.put_column([
+                            pwo.put_text(
+                                f"You did it! You won within {counter} {'guess' if counter == 1 else 'guesses'}!\nI was thinking about {groundtruth}:"),
+                            None,
+                            pwo.put_image(img), None,
+                            pin.put_actions(name="continue", buttons=["Start next round"])
+                        ], size="auto"))
 
-                # todo recognize lack of progress and either alternate seed or tell the user that this is not helping.
-                # todo what happens if we are too specific (more specific than groundtruth)? just accept, and give the user the groundtruth.
+                break
 
             # if counter == 10:
             #    #todo add "you took too many attempts" popup.
             #    break
 
             current_prompt = hierarchy[pos + 1]
-
-        with pwo.popup("Thanks!", closable=False) as s:
-            pwo.put_column([
-                pwo.put_text(f"This puzzle is done."),  # todo include counter and groundtruth
-                pin.put_actions(name="continue", buttons=["Start next round"])
-            ], size="auto")
 
         pin.pin_wait_change("continue")
         pwo.close_popup()
