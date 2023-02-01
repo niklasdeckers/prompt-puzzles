@@ -9,7 +9,7 @@ import pywebio.pin as pin
 from util import get_generated_images, get_gpt3_response
 
 task_data = [  # todo use real examples from skribble?
-    "birch tree",
+    "birch",
     "gummy bear",
     "iphone",
     "hot dog",
@@ -49,39 +49,51 @@ def get_hierarchy(groundtruth):
 """
 This is a 3 step construction of the term "{groundtruth}":'''
     response = get_gpt3_response(prompt)
-    print(prompt, response)
     return [term.lower().strip() for term in re.findall(r"\d\. ([a-zA-Z\- ]+)", response)]
     # todo assert that it ends on groundtruth (best: remove in GPT logic and add later)
 
 
 def get_position_in_hierarchy(guess, hierarchy):
-    insertion = "\n".join([f"{i + 1}. {term}" for i, term in enumerate(list(reversed(hierarchy)) + ["anything"])])
-    prompt = f'''Given the following list of terms:
+    insertion = "\n".join([f"{i + 1}. {term}" for i, term in enumerate(reversed(hierarchy))])
+    prompt = f'''The terms are:
 1. poodle
 2. dog
 3. animal
-4. anything
-What is the first term that is not more specific than "cat" (subject word)? Because every cat (subject word) is an animal (3), but not every cat (subject word) is a dog (2), and the former is directly behind the latter (3 minus 2 is one), this is
-[animal]
+Let's compare this to "pug".
+1. Not every pug is a poodle.
+2. Every pug is a dog.
+3. Every pug is an animal.
 """
-Given the following list of terms:
+The terms are:
 1. red dog
 2. dog
 3. animal
-4. anything
-What is the first term that is not more specific than "doggo" (subject word)? Because doggo (subject word) matches up with the word dog from the list, this is
-[dog]
+Let's compare this to "cat".
+1. Not every cat is a red dog.
+2. Not every cat is a dog.
+3. Every cat is an animal.
 """
-Given the following list of terms:
+The terms are:
+1. pug
+2. dog
+3. animal
+Let's compare this to "car".
+1. Not every car is a pug.
+2. Not every car is a dog.
+3. Not every car is an animal.
+"""
+The terms are:
 {insertion}
-What is the first term that is not more specific than "{guess}" (subject word)? Because'''
+Let's compare this to "{guess}".'''
     response = get_gpt3_response(prompt)
-    print(prompt, response)
-    term = re.search(r"\[([a-zA-Z\- ]+)\]", response).group(1).lower().strip()
-    try:
-        ind = hierarchy.index(term)
-    except ValueError:
+    term = re.search(r"(\d+)\. Every [^\.]+\.", response)
+    if term is None:
         ind = -1  # this corresponds to "anything"
+    else:
+        try:
+            ind = len(hierarchy) - int(term.group(1))
+        except ValueError:
+            ind = -1
     return ind
 
 
