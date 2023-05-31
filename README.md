@@ -32,4 +32,20 @@ refinement. In the end, the generated image is evaluated using given criteria.
 
 ## Further Readings
 
-Todo: Link the CHIIR paper here.
+Please see [our paper](https://doi.org/10.1145/3576840.3578327):
+
+```
+@InProceedings{deckers:2023a,
+  author =                   {Niklas Deckers and Maik Fr\"obe and Johannes Kiesel and Gianluca Pandolfo and Christopher Schr\"oder and Benno Stein and Martin Potthast},
+  booktitle =                {ACM SIGIR Conference on Human Information Interaction and Retrieval (CHIIR 2023)},
+  doi =                      {10.1145/3576840.3578327},
+  editor =                   {Jacek Gwizdka and Soo Young Rieh},
+  month =                    mar,
+  pages =                    {172--186},
+  publisher =                {ACM},
+  site =                     {Austin, TX, USA},
+  title =                    {{The Infinite Index: Information Retrieval on Generative Text-To-Image Models}},
+  url =                      {https://doi.org/10.1145/3576840.3578327},
+  year =                     2023
+}
+```
