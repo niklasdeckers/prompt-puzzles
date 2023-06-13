@@ -78,7 +78,7 @@ def main():
         counter = 0
 
         with pwo.use_scope('target', clear=True):
-            with pwo.put_loading():
+            with pwo.put_loading(): #todo this does not work anymore: pywebio: Changed in version 1.8: when use put_loading() as context manager, the output inside the context will also been removed after the context block exits.
                 pwo.put_image(get_generated_images(wrap_prompt(prompt_groundtruth), seed=42)[0])
 
         with pwo.use_scope('instructions', clear=True):
@@ -100,7 +100,7 @@ def main():
 
             with pwo.use_scope('scrollable'):
                 pwo.put_html("<hr>", position=0)
-                with pwo.put_loading(position=0):
+                with pwo.put_loading(position=0): #todo this does not work anymore: pywebio: Changed in version 1.8: when use put_loading() as context manager, the output inside the context will also been removed after the context block exits.
                     pwo.put_column([
                         pwo.put_image(get_generated_images(prompt, seed=42)[0]),
                         pwo.put_text(f"\nAttempt {counter}:\n{guess}"),
@@ -110,7 +110,7 @@ def main():
                 break
 
         with pwo.popup("Decide!", closable=False) as s:
-            with pwo.put_loading():
+            with pwo.put_loading():  #todo this does not work anymore: pywebio: Changed in version 1.8: when use put_loading() as context manager, the output inside the context will also been removed after the context block exits.
                 pwo.put_column([
                     pwo.put_image(get_generated_images(prompt, seed=43)[0]),
                     # using a different seed to verify generalization
