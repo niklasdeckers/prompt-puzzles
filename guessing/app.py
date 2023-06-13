@@ -124,7 +124,7 @@ def main():
         while True:  # game loop
 
             with pwo.use_scope('scrollable'):
-                with pwo.put_loading():
+                with pwo.put_loading(): #todo this does not work anymore: pywebio: Changed in version 1.8: when use put_loading() as context manager, the output inside the context will also been removed after the context block exits.
                     imgs = get_generated_images(wrap_prompt(current_prompt), num_images=4)
                     put_dialog_message_bot(pwo.put_grid([[pwo.put_image(imgs[0]), None,
                                                           pwo.put_image(imgs[1])], [None, None, None],
@@ -152,7 +152,7 @@ def main():
 
             if pos == len(hierarchy) - 1:
                 with pwo.use_scope('scrollable'):
-                    with pwo.put_loading():
+                    with pwo.put_loading(): #todo this does not work anymore: pywebio: Changed in version 1.8: when use put_loading() as context manager, the output inside the context will also been removed after the context block exits.
                         img = get_generated_images(groundtruth)[0]
                         put_dialog_message_bot(pwo.put_column([
                             pwo.put_text(
